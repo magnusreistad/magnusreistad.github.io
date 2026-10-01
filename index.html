@@ -11,8 +11,8 @@
 <style>
 :root{
   --bg:#FAFAFB; --surface:#FFFFFF; --ink:#18181B; --muted:#5B5B66; --faint:#8A8A96; --line:#E7E7EC;
-  --accent:#3729A9; --accent-hover:#2B1F8F; --accent-soft:#EEEDF9; --btn2:#EDEDF0;
-  --glow-a:#E9E8F6; --glow-b:#F4F4F8; --mesh:#D9D9E2;
+  --accent:#0F766E; --accent-hover:#115E59; --accent-soft:#E3F2EF; --btn2:#EDEDF0;
+  --glow-a:#E2F1EE; --glow-b:#F3F8F7; --dot:#BCD6D1;
   --flag:#B45309; --flag-bg:#FEF3C7; --ok:#15803D; --ok-bg:#DCFCE7;
   --font:"Inter",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
   box-sizing:border-box;
@@ -22,15 +22,15 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0F0F13; --surface:#17171D; --ink:#EDEDF1; --muted:#A3A3AF; --faint:#7C7C88; --line:#2A2A33;
-    --accent:#9E95FF; --accent-hover:#B6AFFF; --accent-soft:#221F3D; --btn2:#22222A;
-    --glow-a:#1B1930; --glow-b:#131318; --mesh:#2C2C38;
+    --accent:#5EEAD4; --accent-hover:#99F6E4; --accent-soft:#12302C; --btn2:#22222A;
+    --glow-a:#10231F; --glow-b:#131816; --dot:#27413C;
     --flag:#FBBF24; --flag-bg:#3A2A08; --ok:#4ADE80; --ok-bg:#0F2A1A;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0F0F13; --surface:#17171D; --ink:#EDEDF1; --muted:#A3A3AF; --faint:#7C7C88; --line:#2A2A33;
-  --accent:#9E95FF; --accent-hover:#B6AFFF; --accent-soft:#221F3D; --btn2:#22222A;
-  --glow-a:#1B1930; --glow-b:#131318; --mesh:#2C2C38;
+  --accent:#5EEAD4; --accent-hover:#99F6E4; --accent-soft:#12302C; --btn2:#22222A;
+  --glow-a:#10231F; --glow-b:#131816; --dot:#27413C;
   --flag:#FBBF24; --flag-bg:#3A2A08; --ok:#4ADE80; --ok-bg:#0F2A1A;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
@@ -62,14 +62,12 @@ h1,h2,h3,h4{font-weight:400;letter-spacing:-.025em;margin:0}
 .nav ul a:not(.btn){font-size:15px;text-decoration:none;display:inline-flex;min-height:44px;align-items:center;padding:0 4px}
 .nav ul a:not(.btn):hover{color:var(--accent)}
 
-/* soft panels with mesh */
+/* soft panels with dot grid */
 .soft{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(180deg,var(--glow-a) 0%,var(--glow-b) 70%,var(--bg) 100%)}
-.mesh{position:absolute;pointer-events:none}
-.mesh ellipse{fill:none;stroke:var(--mesh);stroke-width:1}
+.soft::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(var(--dot) 1.4px,transparent 1.4px);background-size:24px 24px;-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 80%);mask-image:linear-gradient(180deg,#000 0%,transparent 80%)}
 
 /* hero */
 .hero{text-align:center;padding:clamp(80px,11vw,140px) clamp(20px,5vw,64px) clamp(72px,9vw,112px)}
-.hero .mesh{width:900px;height:900px;left:50%;top:-430px;transform:translateX(-50%)}
 .hero .inner{position:relative;max-width:1040px;margin:0 auto}
 .hero h1{font-size:clamp(32px,4.8vw,54px);line-height:1.12;margin-bottom:22px;text-wrap:balance}
 .nowrap{white-space:nowrap}
@@ -108,7 +106,7 @@ section{padding:clamp(80px,10vw,128px) 0 0}
 .link:hover{text-decoration:underline;text-underline-offset:4px}
 
 /* mini UIs */
-.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 8px 24px -16px rgba(40,30,120,.35)}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 8px 24px -16px rgba(15,90,80,.3)}
 .mini-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:500;margin-bottom:10px}
 .mini-head span:last-child{color:var(--faint);font-weight:400;font-size:12px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);margin-bottom:8px}
@@ -141,8 +139,7 @@ section{padding:clamp(80px,10vw,128px) 0 0}
 .features h3{font-size:18px;line-height:24px;font-weight:500;letter-spacing:-.01em;margin-bottom:6px}
 .features p{margin:0;color:var(--muted);font-size:16px;line-height:24px}
 .how{padding:clamp(56px,8vw,96px) clamp(20px,4vw,56px)}
-.how .mesh{width:1100px;height:600px;left:50%;top:-420px;transform:translateX(-50%)}
-.how > *:not(.mesh){position:relative}
+.how > *{position:relative}
 
 /* path */
 .path{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(32px,6vw,96px)}
@@ -157,8 +154,7 @@ section{padding:clamp(80px,10vw,128px) 0 0}
 
 /* contact */
 .contact{text-align:center;padding:clamp(64px,9vw,112px) clamp(20px,5vw,64px)}
-.contact .mesh{width:1100px;height:700px;left:50%;top:-520px;transform:translateX(-50%)}
-.contact > *:not(.mesh){position:relative}
+.contact > *{position:relative}
 .contact h2{font-size:clamp(34px,4.6vw,48px);line-height:1.15;margin-bottom:14px}
 .contact p{color:var(--muted);max-width:44ch;margin:0 auto 28px}
 footer{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;padding:48px 0 56px;margin-top:24px;border-top:1px solid var(--line)}
@@ -195,7 +191,6 @@ footer .links a:hover{color:var(--accent)}
   </nav>
 
   <header class="hero soft" id="top">
-    <svg class="mesh" data-mesh="28" viewBox="0 0 900 900" aria-hidden="true"></svg>
     <div class="inner">
       <span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>Hello, I'm Magnus Reistad</span>
       <h1>Former Big 4 consultant and auditor, <span class="accent">now building <span class="nowrap">real-world</span> products.</span></h1>
@@ -293,7 +288,6 @@ footer .links a:hover{color:var(--accent)}
 
   <section id="how">
     <div class="soft how">
-      <svg class="mesh" data-mesh="22" viewBox="0 0 1100 600" aria-hidden="true"></svg>
       <div class="sec-head center">
         <span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>How I work</span>
         <h2>Audit & consulting discipline, <span class="accent">applied to building</span></h2>
@@ -343,7 +337,6 @@ footer .links a:hover{color:var(--accent)}
 
   <section id="contact">
     <div class="soft contact">
-      <svg class="mesh" data-mesh="24" viewBox="0 0 1100 700" aria-hidden="true"></svg>
       <span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Contact</span>
       <h2>Open to <span class="accent">new roles</span></h2>
       <p>Program and product management, solutions engineering, and hands-on AI and consulting work. If that sounds like your team, I'd like to hear from you.</p>
@@ -372,17 +365,6 @@ footer .links a:hover{color:var(--accent)}
     if(location.hash) history.replaceState(null,'',location.pathname+location.search);
     window.scrollTo(0,0);
   }
-  var ns='http://www.w3.org/2000/svg';
-  document.querySelectorAll('svg.mesh').forEach(function(svg){
-    var vb=svg.viewBox.baseVal, n=+svg.dataset.mesh, cx=vb.width/2, cy=vb.height/2;
-    for(var i=0;i<n;i++){
-      var e=document.createElementNS(ns,'ellipse');
-      e.setAttribute('cx',cx);e.setAttribute('cy',cy);
-      e.setAttribute('rx',vb.width*0.48);e.setAttribute('ry',vb.height*0.48*Math.abs(Math.cos(i*Math.PI/n))+4);
-      e.setAttribute('transform','rotate('+(i*180/n)+' '+cx+' '+cy+')');
-      svg.appendChild(e);
-    }
-  });
   var b=document.getElementById('whyBtn'),t=document.getElementById('trace');
   b.addEventListener('click',function(){
     var o=b.getAttribute('aria-expanded')==='true';
