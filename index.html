@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Magnus Reistad: builder with an auditor's eye</title>
+<meta name="description" content="Magnus Reistad builds AI agents and fraud tooling for fintech, backed by three years of Big 4 IT audit experience.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#EEF1EC; --surface:#FFFFFF; --ink:#18212B; --muted:#4A5562; --line:#D3D9D1;
+  --cobalt:#2443C9; --flag:#E2A93B; --flag-ink:#5A3D00; --ok:#2C6E4F; --widget:#18212B; --widget-ink:#E9EEE7; --widget-muted:#9AA6B2;
+  --display:"Bricolage Grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#12181F; --surface:#1A222B; --ink:#E6EBE4; --muted:#A3AEB9; --line:#2C3743;
+    --cobalt:#8EA4FF; --flag:#E9B44C; --flag-ink:#2A1C00; --ok:#7CC6A0; --widget:#0C1116; --widget-ink:#E6EBE4; --widget-muted:#8A96A3;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12181F; --surface:#1A222B; --ink:#E6EBE4; --muted:#A3AEB9; --line:#2C3743;
+  --cobalt:#8EA4FF; --flag:#E9B44C; --flag-ink:#2A1C00; --ok:#7CC6A0; --widget:#0C1116; --widget-ink:#E6EBE4; --widget-muted:#8A96A3;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+a{color:var(--cobalt);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+
+/* nav */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:24px 0;gap:16px;flex-wrap:wrap}
+.nav .mark{font-family:var(--display);font-weight:800;font-size:1.15rem;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.nav ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex-wrap:wrap}
+.nav ul a{display:inline-block;padding:10px 12px;color:var(--muted);text-decoration:none;font-weight:500;font-size:.95rem;border-radius:6px}
+.nav ul a:hover{color:var(--ink);background:var(--surface)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(32px,5vw,64px);align-items:center;padding:clamp(32px,6vw,72px) 0 clamp(56px,8vw,96px)}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,6.4vw,4.75rem);line-height:.98;letter-spacing:-.035em;margin:0 0 28px}
+.hero .lede{font-size:clamp(1.1rem,1.6vw,1.3rem);line-height:1.55;color:var(--muted);max-width:34ch;margin:0 0 32px}
+.hero .lede strong{color:var(--ink);font-weight:600}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 22px;border-radius:8px;font-weight:600;text-decoration:none;font-size:1rem;border:2px solid var(--ink)}
+.btn.primary{background:var(--ink);color:var(--ground)}
+.btn.primary:hover{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.btn.secondary{color:var(--ink)}
+.btn.secondary:hover{background:var(--surface)}
+
+/* widget: the memorable thing */
+.case{background:var(--widget);color:var(--widget-ink);border-radius:14px;padding:22px;font-family:var(--mono);font-size:.86rem;line-height:1.5;box-shadow:0 30px 60px -30px rgba(10,20,30,.55)}
+.case-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:16px;font-family:var(--body)}
+.case-head .t{font-weight:600;font-size:.95rem}
+.case-head .s{color:var(--widget-muted);font-size:.8rem}
+.txn{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:14px 0;border-top:1px solid #2B3642;border-bottom:1px solid #2B3642}
+.txn .amt{font-size:1.5rem;font-weight:500;font-family:var(--display);letter-spacing:-.01em}
+.status{align-self:center;background:var(--flag);color:#2A1C00;font-family:var(--body);font-weight:600;font-size:.82rem;padding:4px 10px;border-radius:999px}
+.txn .meta{color:var(--widget-muted);grid-column:1/-1}
+.rules{list-style:none;margin:14px 0;padding:0;display:grid;gap:8px}
+.rules li{display:grid;grid-template-columns:auto 1fr;gap:10px}
+.rules .hit{color:var(--flag)}
+.why{width:100%;min-height:46px;margin-top:4px;background:transparent;color:var(--widget-ink);border:1px solid #3A4755;border-radius:8px;font-family:var(--body);font-weight:600;font-size:.95rem;cursor:pointer;text-align:left;padding:0 14px;display:flex;justify-content:space-between;align-items:center}
+.why:hover{background:#1F2A35}
+.why .chev{transition:transform .2s ease}
+.why[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.trace{overflow:hidden;max-height:0;transition:max-height .45s ease}
+.trace.open{max-height:640px}
+.trace ol{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.trace .call{color:#9FB4FF}
+.trace .res{color:var(--widget-muted);padding-left:14px}
+.rationale{margin-top:14px;padding:12px 14px;background:#202B36;border-radius:8px;font-family:var(--body);font-size:.92rem;line-height:1.55}
+.case-foot{margin-top:14px;color:var(--widget-muted);font-family:var(--body);font-size:.78rem}
+
+/* sections */
+section{padding:clamp(56px,8vw,96px) 0;border-top:1px solid var(--line)}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.9rem,3.6vw,2.6rem);letter-spacing:-.025em;line-height:1.05;margin:0 0 12px}
+.sec-intro{color:var(--muted);max-width:60ch;margin:0 0 44px}
+
+/* projects */
+.feature{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(28px,4vw,56px);padding:clamp(24px,4vw,40px);background:var(--surface);border-radius:16px;border:1px solid var(--line);margin-bottom:24px}
+.feature h3,.proj h3{font-family:var(--display);font-weight:700;font-size:1.65rem;letter-spacing:-.02em;margin:0 0 6px}
+.tagline{color:var(--muted);margin:0 0 18px}
+.feature p{margin:0 0 14px;max-width:62ch}
+.pill{display:inline-block;font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:999px;margin-bottom:14px}
+.pill.live{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.pill.wip{background:color-mix(in srgb,var(--flag) 22%,transparent);color:var(--ink)}
+.decisions h4{font-family:var(--body);font-size:1rem;font-weight:600;margin:0 0 10px}
+.decisions ul{margin:0 0 20px;padding-left:1.1em}
+.decisions li{margin-bottom:10px;color:var(--muted)}
+.decisions li strong{color:var(--ink);font-weight:600}
+.stack{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.stack li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:6px;color:var(--muted);background:var(--ground)}
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.proj{padding:clamp(22px,3vw,32px);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column}
+.proj p{margin:0 0 16px}
+.proj .stack{margin-top:auto;margin-bottom:16px}
+.proj a.repo{font-weight:600}
+
+/* experience */
+.exp{display:grid;grid-template-columns:220px 1fr;gap:clamp(20px,4vw,56px)}
+.exp + .exp{margin-top:44px}
+.exp .when{color:var(--muted);font-size:.95rem;padding-top:4px}
+.exp h3{font-family:var(--display);font-size:1.35rem;font-weight:700;letter-spacing:-.015em;margin:0 0 2px}
+.exp .org{color:var(--muted);margin:0 0 14px}
+.exp ul{margin:0;padding-left:1.1em;max-width:66ch}
+.exp li{margin-bottom:8px}
+
+/* background */
+.bg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px)}
+.bg-grid h3{font-family:var(--display);font-size:1.2rem;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+.bg-grid p{margin:0;color:var(--muted)}
+
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px)}
+.skills h3{font-family:var(--body);font-size:1rem;font-weight:600;margin:0 0 12px}
+
+/* contact */
+.contact{background:var(--ink);color:var(--ground);border-radius:16px;padding:clamp(32px,5vw,56px);display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:end}
+.contact h2{color:var(--ground)}
+.contact p{margin:0;color:color-mix(in srgb,var(--ground) 75%,transparent);max-width:46ch}
+.contact .links{display:grid;gap:10px}
+.contact .links a{color:var(--ground);font-weight:600;font-size:1.05rem;display:inline-flex;min-height:44px;align-items:center}
+footer{padding:32px 0 48px;color:var(--muted);font-size:.9rem}
+
+@media (max-width:900px){
+  .hero,.feature,.proj-grid,.contact{grid-template-columns:1fr}
+  .bg-grid,.skills{grid-template-columns:1fr}
+  .exp{grid-template-columns:1fr;gap:4px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="Main">
+    <a class="mark" href="#top">Magnus Reistad</a>
+    <ul>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero" id="top">
+    <div>
+      <h1>I audited financial systems for three years. Now I build them.</h1>
+      <p class="lede">Former EY Risk Assurance Senior building <strong>AI agents for fraud detection and compliance</strong>. I know what an examiner will ask for, so I design software that already has the answer.</p>
+      <div class="cta">
+        <a class="btn primary" href="#projects">See my projects</a>
+        <a class="btn secondary" href="mailto:magnus.reistad@outlook.com">Email me</a>
+      </div>
+    </div>
+
+    <aside class="case" aria-label="Example of a ClearFlag flagged transaction">
+      <div class="case-head">
+        <span class="t">ClearFlag review queue</span>
+        <span class="s">Sample data</span>
+      </div>
+      <div class="txn">
+        <span class="amt">$2,480.00</span>
+        <span class="status">Flagged</span>
+        <span class="meta">Online electronics merchant, card-not-present</span>
+      </div>
+      <ul class="rules">
+        <li><span class="hit">●</span><span>amount_vs_baseline: 6.1× account average</span></li>
+        <li><span class="hit">●</span><span>velocity_24h: 5 transactions in 40 min</span></li>
+        <li><span class="hit">●</span><span>geo_jump: 1,140 mi from last purchase</span></li>
+      </ul>
+      <button class="why" id="whyBtn" aria-expanded="false" aria-controls="trace">
+        <span>Why was this flagged?</span>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="trace" id="trace">
+        <ol>
+          <li><span class="call">get_transaction_history(account)</span><div class="res">Typical spend under $400; no prior electronics purchases</div></li>
+          <li><span class="call">get_merchant_risk_score(merchant)</span><div class="res">Elevated: high chargeback rate for its category</div></li>
+          <li><span class="call">get_geo_distance(prev, current)</span><div class="res">1,140 mi in under 2 hours</div></li>
+        </ol>
+        <div class="rationale">Three independent signals agree: the amount is far above this account's normal range, the merchant carries elevated risk, and the location change is not physically plausible. Recommend holding for review.</div>
+      </div>
+      <p class="case-foot">Illustrates the Investigation Agent in progress: every rationale is grounded in tool evidence and stored in an append-only audit table.</p>
+    </aside>
+  </header>
+</div>
+
+<section id="projects">
+  <div class="wrap">
+    <h2>Projects</h2>
+    <p class="sec-intro">Each one started from a problem I saw firsthand in audit work. I run them like a product team would: sprints in Jira, design docs and a decision log in Confluence, CI on every push.</p>
+
+    <article class="feature">
+      <div>
+        <span class="pill wip">In active development</span>
+        <h3>ClearFlag</h3>
+        <p class="tagline">A transaction fraud rules engine with explainable, agent-written rationales.</p>
+        <p>ClearFlag scores transactions against configurable fraud rules and shows analysts exactly which rules fired and why. Its transparency layer exposes every rule hit, and the Investigation Agent now being built uses LangGraph to gather evidence through three tools (transaction history, merchant risk, geographic distance) before writing a rationale.</p>
+        <p>The point is the same one an auditor makes: a flag nobody can explain is a flag nobody can defend.</p>
+      </div>
+      <div class="decisions">
+        <h4>Decisions I'd walk you through</h4>
+        <ul>
+          <li><strong>Deterministic tool dispatch.</strong> Code decides which tools run, not the LLM, so every investigation follows a repeatable, testable path.</li>
+          <li><strong>Append-only rationale table.</strong> Rationales are composed outside the request path and stored as both a cache and an audit record.</li>
+          <li><strong>Graceful fallback.</strong> If the agent, a tool, or a guardrail fails, the system falls back to a template formatter instead of showing nothing.</li>
+        </ul>
+        <ul class="stack" aria-label="Tech stack">
+          <li>Python</li><li>FastAPI</li><li>React</li><li>LangGraph</li><li>SQLAlchemy</li><li>Alembic</li><li>Neon Postgres</li><li>GitHub Actions</li><li>LangSmith</li>
+        </ul>
+      </div>
+    </article>
+
+    <div class="proj-grid">
+      <article class="proj">
+        <span class="pill live">Shipped</span>
+        <h3>SOC Readiness SaaS</h3>
+        <p class="tagline">SOC 2 audit-readiness platform built on real Big 4 testing methodology.</p>
+        <p>Evaluates control evidence against AICPA testing attributes (walkthrough, population, IPE, sample testing). A classification engine derives testing requirements from each control's type and frequency, AI-assisted evidence review flags gaps, and a GitHub API integration pulls evidence automatically.</p>
+        <ul class="stack" aria-label="Tech stack">
+          <li>Next.js</li><li>FastAPI</li><li>Supabase</li><li>OpenAI GPT-4.1</li>
+        </ul>
+        <a class="repo" href="https://github.com/magnusreistad/soc-readiness-SaaS">View on GitHub</a>
+      </article>
+
+      <article class="proj">
+        <span class="pill wip">In progress</span>
+        <h3>TPM Ops Agent</h3>
+        <p class="tagline">An agent that turns Jira sprint data into status reports.</p>
+        <p>A LangGraph agent built to pull sprint data from the Jira Cloud REST API and draft the status report a technical program manager would otherwise write by hand. Built because I run my own projects in Jira and wanted the reporting to take care of itself.</p>
+        <ul class="stack" aria-label="Tech stack">
+          <li>Python</li><li>LangGraph</li><li>LangChain</li><li>Anthropic API</li><li>Jira REST API</li>
+        </ul>
+        <a class="repo" href="https://github.com/magnusreistad/tpm-ops-agent">View on GitHub</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <h2>Experience</h2>
+    <p class="sec-intro">Three years at EY across SOC 1, SOC 2, SOX, and AI risk work for financial services, technology, and healthcare clients.</p>
+
+    <div class="exp">
+      <div class="when">Aug 2025 to Jul 2026</div>
+      <div>
+        <h3>Risk Assurance Senior</h3>
+        <p class="org">Ernst &amp; Young, Hartford, CT</p>
+        <ul>
+          <li>Ran 3 to 5 concurrent SOC 1, SOC 2, and SOX engagements, owning budgets, timelines, and client relationships and reporting directly to partners.</li>
+          <li>Led IT application control and key report testing on PCAOB-integrated audits, finding control gaps and driving remediation before deadlines.</li>
+          <li>Applied NIST CSF and FS AI RMF on cybersecurity and AI risk consulting work.</li>
+          <li>Joined client sales calls with GRC platform teams such as Vanta, mapping client pain points to how the tool should be configured.</li>
+          <li>Mentored 2 to 4 junior staff per cycle on methodology and client communication.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exp">
+      <div class="when">Aug 2023 to Aug 2025</div>
+      <div>
+        <h3>Risk Assurance Staff</h3>
+        <p class="org">Ernst &amp; Young, Hartford, CT</p>
+        <ul>
+          <li>Executed SOC 1, SOC 2, and Financial Audit IT testing across industries and delivered remediation recommendations to client IT and finance teams.</li>
+          <li>Built a Power BI status dashboard that refreshed daily from the team's manual tracker, cutting weekly status prep from 20 minutes to 5.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exp">
+      <div class="when">Summer 2022</div>
+      <div>
+        <h3>Tech Risk Consultant Intern</h3>
+        <p class="org">Ernst &amp; Young, Hartford, CT</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <h2>Before the audit work</h2>
+    <p class="sec-intro">Grew up in Norway, came to the U.S. to play Division 1 soccer, and stayed to study information systems.</p>
+    <div class="bg-grid">
+      <div>
+        <h3>Norwegian Special Forces</h3>
+        <p>A year with Spec Ops Command maintaining marine equipment and solving problems in the field with limited food, water, and sleep.</p>
+      </div>
+      <div>
+        <h3>Division 1 soccer</h3>
+        <p>Four years as an outside back at Quinnipiac, reaching the 2019 MAAC semi-final and the 2021 conference final. MAAC All-Academic team.</p>
+      </div>
+      <div>
+        <h3>Quinnipiac University</h3>
+        <p>B.S. in Computer Information Systems with a minor in Psychology, 3.84 GPA, Dean's List.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <h2>Toolkit</h2>
+    <div class="skills" style="margin-top:32px">
+      <div>
+        <h3>Building</h3>
+        <ul class="stack"><li>Python</li><li>SQL</li><li>FastAPI</li><li>React</li><li>Next.js</li><li>LangGraph</li><li>LangChain</li><li>Anthropic API</li><li>OpenAI API</li><li>Postgres</li><li>Supabase</li><li>GitHub Actions</li><li>Power BI</li></ul>
+      </div>
+      <div>
+        <h3>Risk and compliance</h3>
+        <ul class="stack"><li>SOC 1</li><li>SOC 2</li><li>SOX (ITGCs, ITACs, IPE)</li><li>PCAOB audits</li><li>NIST CSF</li><li>FS AI RMF</li><li>TPRM</li></ul>
+      </div>
+      <div>
+        <h3>Certifications and languages</h3>
+        <ul class="stack"><li>CRISC</li><li>Professional Scrum Master I</li><li>English (fluent)</li><li>Norwegian (fluent)</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" style="border-top:none;padding-top:0">
+  <div class="wrap">
+    <div class="contact">
+      <div>
+        <h2>Let's talk</h2>
+        <p>I'm looking for technical product and solutions roles at fintech companies working on fraud, identity, and compliance automation. Based in Connecticut and open to remote.</p>
+      </div>
+      <div class="links">
+        <a href="mailto:magnus.reistad@outlook.com">magnus.reistad@outlook.com</a>
+        <a href="https://www.linkedin.com/in/magnus-reistad/">LinkedIn</a>
+        <a href="https://github.com/magnusreistad">GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">© 2026 Magnus Reistad</div>
+</footer>
+
+<script>
+(function(){
+  var btn=document.getElementById('whyBtn');
+  var trace=document.getElementById('trace');
+  btn.addEventListener('click',function(){
+    var open=btn.getAttribute('aria-expanded')==='true';
+    btn.setAttribute('aria-expanded',String(!open));
+    trace.classList.toggle('open',!open);
+  });
+})();
+</script>
+</body>
+</html>
