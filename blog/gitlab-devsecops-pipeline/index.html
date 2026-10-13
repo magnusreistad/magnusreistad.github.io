@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building audit-ready change controls into a GitLab pipeline | Magnus Reistad</title>
+<meta name="description" content="How I built a GitLab CI/CD pipeline with SAST, secret detection, and dependency scanning, mapped its controls to NIST 800-53, SOC 2, and NIST SSDF, and what the scanners found and missed.">
+<link rel="canonical" href="https://magnusreistad.com/blog/gitlab-devsecops-pipeline/">
+<meta property="og:title" content="Building audit-ready change controls into a GitLab pipeline">
+<meta property="og:description" content="How I built a GitLab CI/CD pipeline with SAST, secret detection, and dependency scanning, mapped its controls to NIST 800-53, SOC 2, and NIST SSDF, and what the scanners found and missed.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://magnusreistad.com/blog/gitlab-devsecops-pipeline/">
+<meta property="og:image" content="https://magnusreistad.com/blog/gitlab-devsecops-pipeline/images/mr7-security-widget.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFAFB; --surface:#FFFFFF; --ink:#18181B; --muted:#5B5B66; --faint:#8A8A96; --line:#E7E7EC;
+  --accent:#0F766E; --accent-hover:#115E59; --accent-soft:#E3F2EF; --btn2:#EDEDF0;
+  --glow-a:#E2F1EE; --glow-b:#F3F8F7; --dot:#BCD6D1;
+  --flag:#B45309; --flag-bg:#FEF3C7; --ok:#15803D; --ok-bg:#DCFCE7;
+  --font:"Inter",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F0F13; --surface:#17171D; --ink:#EDEDF1; --muted:#A3A3AF; --faint:#7C7C88; --line:#2A2A33;
+    --accent:#5EEAD4; --accent-hover:#99F6E4; --accent-soft:#12302C; --btn2:#22222A;
+    --glow-a:#10231F; --glow-b:#131816; --dot:#27413C;
+    --flag:#FBBF24; --flag-bg:#3A2A08; --ok:#4ADE80; --ok-bg:#0F2A1A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F0F13; --surface:#17171D; --ink:#EDEDF1; --muted:#A3A3AF; --faint:#7C7C88; --line:#2A2A33;
+  --accent:#5EEAD4; --accent-hover:#99F6E4; --accent-soft:#12302C; --btn2:#22222A;
+  --glow-a:#10231F; --glow-b:#131816; --dot:#27413C;
+  --flag:#FBBF24; --flag-bg:#3A2A08; --ok:#4ADE80; --ok-bg:#0F2A1A;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-optical-sizing:auto;font-size:18px;line-height:28px;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
+h1,h2,h3,h4{font-weight:400;letter-spacing:-.025em;margin:0}
+
+/* labels */
+.label{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:16px;line-height:24px;font-weight:500;margin-bottom:14px}
+.label svg{width:16px;height:16px}
+
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--accent);text-decoration:none}
+.link{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:16px;font-weight:500;color:var(--accent);text-decoration:none}
+.link:hover{text-decoration:underline;text-underline-offset:4px}
+.link svg{width:16px;height:16px}
+
+/* post */
+.post{max-width:720px;margin:0 auto;padding:clamp(48px,7vw,88px) 0 0}
+.post header{margin-bottom:clamp(32px,4vw,48px)}
+.post h1{font-size:clamp(34px,4.6vw,48px);line-height:1.15;margin-bottom:14px;text-wrap:balance}
+.post .lead{color:var(--muted);font-size:20px;line-height:30px;margin:0 0 16px}
+.post .meta{color:var(--faint);font-size:14px;line-height:20px;margin:0}
+.post h2{font-size:clamp(26px,3vw,32px);line-height:1.2;margin:56px 0 16px}
+.post p,.post ul{margin:0 0 20px}
+.post ul{padding-left:1.1em}
+.post li{margin-bottom:6px}
+.post strong{font-weight:500}
+.post a{color:var(--accent);text-underline-offset:4px}
+.post a:hover{color:var(--accent-hover)}
+.post code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;padding:2px 6px;border-radius:6px;background:var(--btn2)}
+.post figure{margin:32px 0}
+.post img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:14px}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.post table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px;line-height:20px}
+.post th,.post td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+.post th{font-weight:500;background:var(--btn2)}
+.post tr:last-child td{border-bottom:0}
+
+footer{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;padding:48px 0 56px;margin-top:clamp(80px,10vw,128px);border-top:1px solid var(--line)}
+footer small{display:block;color:var(--muted);font-size:14px;margin-top:6px}
+footer .links{display:flex;gap:28px;flex-wrap:wrap}
+footer .links a{font-size:14px;text-decoration:none;display:inline-flex;min-height:44px;align-items:center}
+footer .links a:hover{color:var(--accent)}
+
+@media (max-width:680px){
+  body{font-size:16px;line-height:24px}
+  .post .lead{font-size:18px;line-height:28px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="Main">
+    <a class="logo" href="/">Magnus Reistad</a>
+    <a class="link" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back to home</a>
+  </nav>
+
+  <article class="post">
+    <header>
+      <span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span><a href="/#soc-readiness">SOC Readiness SaaS</a> · Project write-up</span></span>
+      <h1>Building audit-ready change controls into a GitLab pipeline</h1>
+      <p class="lead">This write-up covers one part of SOC Readiness SaaS: the GitLab CI/CD pipeline and security controls I built around it, and what they found in the platform's own code.</p>
+      <p class="meta"><time datetime="2026-10-13">October 13, 2026</time></p>
+    </header>
+
+    <h2>Why I built the pipeline</h2>
+
+    <p>As a SOC 2 and SOX IT auditor, I test other people's change management controls: is the production branch protected, do changes need a passing pipeline, do security scans run, and did anyone act on the results? I wanted to be on the other side of that table. I moved SOC Readiness SaaS, a full-stack audit-readiness platform I built (Next.js, FastAPI, Supabase), into GitLab and built a pipeline whose controls map to NIST 800-53, SOC 2, and NIST SSDF, backed by evidence an auditor would accept.</p>
+
+    <h2>What the pipeline does</h2>
+
+    <p>Every merge request runs lint, test, and build, plus SAST, secret detection, and SBOM-based dependency scanning with static reachability, which shows whether a vulnerable package is actually imported. The production branch (main) is protected, and the "Pipelines must succeed" setting blocks a failing change from merging. I used GitLab's v2 dependency scanning template because the older analyzer is deprecated and scheduled for removal, and I baselined existing lint debt rather than rewriting working code in the same change.</p>
+
+    <h2>Control mapping</h2>
+
+    <p>Each row is a control the pipeline enforces, mapped to the requirements it helps satisfy in NIST 800-53 Rev 5, the SOC 2 Trust Services Criteria, and the NIST Secure Software Development Framework (SSDF). The purpose is to translate engineering settings into the language an auditor or a customer's security reviewer works in: instead of "we run SAST," the table shows which requirements that supports and whether the control is actually working. The status column makes that distinction explicit. "Operating" means the control is in place and backed by evidence such as settings, scan reports, and merge requests; "Design only" means it is configured but can't yet be shown working, like required approvals on a project with a single maintainer.</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Pipeline control</th><th>NIST 800-53 Rev 5</th><th>SOC 2</th><th>NIST SSDF</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Required MR pipeline (lint/test/build)</td><td>CM-3, CM-3(2), SA-11</td><td>CC8.1</td><td>PO.3.2, PW.8</td><td>Operating</td></tr>
+          <tr><td>Protected branches</td><td>CM-5, AC-3</td><td>CC6.1, CC8.1</td><td>PS.1</td><td>Operating</td></tr>
+          <tr><td>MR approvals</td><td>CM-3, AC-5</td><td>CC8.1</td><td>PW.7</td><td>Design only</td></tr>
+          <tr><td>SAST</td><td>SA-11(1), RA-5</td><td>CC7.1, CC8.1</td><td>PW.7, RV.1, RV.2</td><td>Operating</td></tr>
+          <tr><td>Secret detection</td><td>IA-5(7)</td><td>CC6.1</td><td>PW.7</td><td>Operating</td></tr>
+          <tr><td>Dependency scanning (SBOM)</td><td>RA-5, SI-2, SR-3</td><td>CC7.1</td><td>PW.4, RV.1, RV.2, PS.3.2</td><td>Operating</td></tr>
+          <tr><td>Pipeline logs and artifacts retained</td><td>AU-11, CM-3</td><td>CC4.1</td><td>PO.3.3, PS.3.2</td><td>Operating</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>What the scanners found, and what they missed</h2>
+
+    <p>SAST reported 20 findings. I traced every flagged value to its source before deciding: 16 false positives, 2 accepted risks, and 2 fixes, each recorded as a GitLab dismissal with a reason, so the rationale lives where a reviewer would look for it.</p>
+
+    <p>The most useful finding was one the scanner got wrong. It flagged an SSRF in the frontend API proxy, which was a false positive as reported, since the destination host is fixed by config. But tracing the path showed that encoded <code>../</code> segments could skip the proxy's own session check. I fixed that instead.</p>
+
+    <p>Reading the code behind an XXE finding surfaced a risk no scanner flagged: the upload limit applied to compressed size, so a crafted document could expand to gigabytes. GitLab Duo's review caught that my first guard protected the wrong parsing path, so I held the merge despite a green pipeline. The final fix guards all four parsers, with tests that fail if the guard is removed.</p>
+
+    <p>Dependency scanning reported 38 unique findings, and 35 are fixed. PyJWT, on the authentication path, carried 15 of them, and a Next.js security release cleared 19 more, including three critical remote code execution advisories. Because PostCSS and sharp were indirect dependencies, I confirmed the lock file actually resolved the fixed versions instead of assuming it. The remaining 3 are documented: one false positive caused by incomplete advisory data, and two dev-only packages with no fix that never ship to production.</p>
+
+    <figure>
+      <img src="images/mr7-security-widget.png" width="1600" height="986" loading="lazy" alt="GitLab merge request security widget listing fixed dependency findings">
+    </figure>
+
+    <p>The best result came from preparing the PyJWT upgrade. Inventorying its call sites showed the backend read the JWT algorithm from the token's own unverified header, letting the token choose how it would be verified. Forged tokens failed only as a side effect of the key type, and crashed with a 500. I restricted verification to asymmetric algorithms, bound the token's algorithm to the key, enforced audience and issuer, and made every JWT error return 401. The new tests fail against the old code, and I verified the change against the live identity provider before merging. When Duo pushed back that pinning a single algorithm would break on a key rotation, I agreed, widened the allowlist, and recorded the decision in the review thread.</p>
+
+    <figure>
+      <img src="images/mr6-duo-thread.png" width="1600" height="989" loading="lazy" alt="GitLab Duo review comment questioning the single-algorithm JWT allowlist, with the author's reply accepting ES256 and RS256">
+    </figure>
+
+    <h2>What broke</h2>
+
+    <p>I got a green pipeline I couldn't trust. While fixing how the scanner resolved Python dependencies, my MR passed every check but showed 13 tests instead of 50 and reported SAST findings I had already fixed. The branch had been cut from a local main that tracked GitHub, 11 commits behind GitLab, so the pipeline tested code that didn't match what would merge. I rebuilt the change on GitLab's main, mirrored GitLab to GitHub so the two can't drift, and now cross-check test counts instead of trusting a green check mark.</p>
+
+    <h2>Known limitations</h2>
+
+    <ul>
+      <li><strong>Solo maintainer:</strong> approvals and separation of duties are design only.</li>
+      <li><strong>Scans inform, they don't block:</strong> security jobs are <code>allow_failure</code>.</li>
+      <li><strong>Coverage gaps:</strong> existing lint debt is baselined, and dev tooling isn't scanned yet.</li>
+    </ul>
+
+    <h2>What I'd do next</h2>
+
+    <ul>
+      <li>A merge request approval policy that blocks new critical or high findings.</li>
+      <li>Merged results pipelines, which would have caught the stale branch automatically.</li>
+      <li>Hash-pinned lock files and a license approval policy, for supply-chain integrity.</li>
+      <li>Fixed message codes on the login page. While reviewing new lint warnings for open redirects, I found it displays any <code>?message=</code> text, which a crafted link could use for phishing.</li>
+    </ul>
+
+    <p>The code is on GitHub: <a href="https://github.com/magnusreistad/soc-readiness-SaaS">soc-readiness-SaaS</a>.</p>
+  </article>
+
+  <footer>
+    <div>
+      <span class="logo">Magnus Reistad</span>
+      <small>© 2026 Magnus Reistad</small>
+    </div>
+    <div class="links">
+      <a href="mailto:magnus.reistad@outlook.com">magnus.reistad@outlook.com</a>
+      <a href="https://www.linkedin.com/in/magnus-reistad/">LinkedIn</a>
+      <a href="https://github.com/magnusreistad">GitHub</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

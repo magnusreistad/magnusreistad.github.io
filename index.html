@@ -104,6 +104,7 @@ section{padding:clamp(80px,10vw,128px) 0 0}
 .stack li{font-size:13px;line-height:18px;padding:4px 10px;border-radius:6px;background:var(--btn2);color:var(--muted)}
 .link{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:16px;font-weight:500;color:var(--accent);text-decoration:none}
 .link:hover{text-decoration:underline;text-underline-offset:4px}
+.links-row{display:flex;flex-wrap:wrap;gap:0 24px}
 
 /* mini UIs */
 .mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 8px 24px -16px rgba(15,90,80,.3)}
@@ -248,7 +249,7 @@ footer .links a:hover{color:var(--accent)}
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" id="soc-readiness">
         <div class="media">
           <div class="mini" aria-label="SOC Readiness control testing, sample data">
             <div class="mini-head"><span>Control testing</span><span>Sample data</span></div>
@@ -262,7 +263,10 @@ footer .links a:hover{color:var(--accent)}
           <p class="tag">SOC 2 readiness built on real Big 4 testing methodology.</p>
           <p>Evaluates control evidence against AICPA testing attributes, derives testing requirements from each control's type and frequency, and pulls evidence through a GitHub API integration.</p>
           <ul class="stack"><li>Next.js</li><li>FastAPI</li><li>Supabase</li><li>OpenAI</li></ul>
-          <a class="link" href="https://github.com/magnusreistad/soc-readiness-SaaS">View on GitHub <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+          <div class="links-row">
+            <a class="link" href="https://github.com/magnusreistad/soc-readiness-SaaS">View on GitHub <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+            <a class="link" href="/blog/gitlab-devsecops-pipeline/">Write-up: securing its CI/CD pipeline <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+          </div>
         </div>
       </article>
 
